@@ -3,4 +3,8 @@ description: Personal website and blog
 url: "https://felix772.github.io"
 theme: minima
 timezone: UTC
+header_pages:
+  - resume.md
+  - projects.md
+  - skills.md
 
