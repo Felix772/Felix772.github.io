@@ -4,9 +4,9 @@ title: Home
 ---
 
 # Felix Hao
-CS student seeking Software Engineering Internship (Summer 2026)
+CS student at the University of Florida seeking Software Engineering Internship (Summer 2026)
 
-- Interested in: Systems / Backend / Distributed Systems
+- Interested in: Systems / Backend / Distributed Systems / HPC
 - Strengths: C++ • Python • Data Structures • Performance
 
 ## Highlights
