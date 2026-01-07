@@ -83,7 +83,7 @@ std::string s = "hello";
 
 g(s);
 g("hello");
-g(std::move(s));
+g(std::move(s));//this passes s to g() as an rvalue
 ```
 
 #### Move Semantic application in Match Engine
@@ -93,8 +93,10 @@ g(std::move(s));
 Order o = parse_order();
 order_book.add(std::move(o));
 ```
+### Important Note:
+#### Move semantics apply to objects regardless of whether they are stored on the stack or heap. They are useful for types that manage resources (often heap memory). Trivially copyable types like int and char gain no benefit from move semantics because copying them is already optimal.
 
-### Why move semanic matters in the matching engine?
+### **Why move semanic matters in the matching engine?**
 
 ### 1) Matching engines are dominated by object movement
 
