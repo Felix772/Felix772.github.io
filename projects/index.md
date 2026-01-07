@@ -327,3 +327,43 @@ Move semantics + `noexcept` is a real performance lever.
 
 ------------------------------------------------------------------------
 ### 4. Casting
+
+The inputs for my most recent version of match engine are expected to be in the format "A,ts,order_id,side,price,qty,trader" or "C,ts,order_id". And since these data will be stored into Order containers right away and will not be modified. They are iterated using lazy views for a faster and more readable code:
+
+```cpp
+
+auto p = line | std::views::split(',');
+auto it = p.begin();
+
+```
+Here p is a range view, where each element in p is a subrange of characters and behaves similarly to std::string_view. To convert them into the desired types for connstructing Orders, it's necessary to first create a string from each subrange of characters.
+
+```cpp
+\\helper for creating strings
+static std::string to_string_field(auto &&field) {
+  return {field.begin(), field.end()};
+}
+
+```
+Now we can convert these strings to parameter types using `std::stoi()` (for integers), or `*(*it++).begin()` (for chars). However, since the quantity parameter is of type unsigned. It's necessary to cast the input string to unsigned after using the `std::stoul` method to avoid narrowing conversions.
+
+```cpp
+o.ts = std::stoi(to_string_field(*it++));
+  if (it == p.end())
+    return false;
+  o.order_id = std::stoi(to_string_field(*it++));
+  if (it == p.end())
+    return false;
+  o.side = *(*it++).begin();
+  if (it == p.end())
+    return false;
+  o.price = std::stoi(to_string_field(*it++));
+  if (it == p.end())
+    return false;
+  o.qty = static_cast<unsigned>(std::stoul(to_string_field(*it++)));
+  if (it == p.end())
+    return false;
+  o.trader = to_string_field(*it);
+```
+
+---
