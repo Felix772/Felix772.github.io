@@ -11,7 +11,7 @@ title: Projects
 -   Focused on **performance, determinism, and correctness**
 -   Emphasized exchange-style constraints such as **price-time
     priority**
--   [GitHub](https://github.com/Felix772/MatchEngine)
+-   [GitHub](https://github.com/Felix772/Match-Engine.git)
 
 ---
 
