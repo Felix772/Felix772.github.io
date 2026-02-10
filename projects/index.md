@@ -89,7 +89,7 @@ g(std::move(s));//this passes s to g() as an rvalue
 #### Move Semantic application in Match Engine
 
 ``` cpp
-\\adding a new order to buy/sell books
+//adding a new order to buy/sell books
 Order o = parse_order();
 order_book.add(std::move(o));
 ```
