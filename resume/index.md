@@ -36,4 +36,4 @@ model andraised the R^2 value from 0.47 to 0.86.
 ---
 
 ### Download PDF
-[Download my resume (PDF)](/assets/resume.pdf)
+[Download my resume (PDF)](/assets/ZaichenHao_Resume.pdf)
