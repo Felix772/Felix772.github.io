@@ -16,6 +16,7 @@ title: MatchEngine
   - [Floating-point precision](#floating-point-precision-in-price-comparison)
   - [getline Windows vs Linux](#stdgetline-behavior-difference-between-windows-and-linux)
   - [Move semantics](#enabling-move-semantics-lvalues-vs-rvalues)
+- [Testing](#testing) 
 - [Casting](#casting)
 - [Padding Alignment](#padding-alignment)
 
@@ -330,7 +331,61 @@ Move semantics + `noexcept` is a real performance lever.
 
 
 ---
+## Testing
+This project was tested with one goal - validating performance using quantitative tools.
+To do this, I used:
+- Google Benchmark for microbenchmarks (repeatable, statistically meaningful timing)
+- Linux perf for profiling (CPU cycles, cache behavior, branch misses, and hotspots)
 
+### 1) Microbenchmarking with Google Benchmark
+
+Google Benchmark (https://bencher.dev/learn/benchmarking/cpp/google-benchmark/) is used to measure small, isolated components of the engine in a controlled environment. This is critical because the matching engine is extremely sensitive to:
+- object movement (Order, Trade, event structures)
+- container operations (push, erase, emplace)
+- parsing overhead (getline, views::split, conversions)
+- hot-path comparisons (price-time priority logic)
+
+Benchmark design goals
+
+- Avoid I/O in benchmark loops (I/O dominates runtime and ruins measurements)
+- Pre-generate input orders in memory
+
+```cpp
+\\benchmark_orderbook.cpp
+#include "orderbook.h"
+#include <benchmark/benchmark.h>
+
+static void BENCHMARK_orderbook(benchmark::State &state) {
+  for (auto _ : state) {
+    // optional but recommended: start from a clean book each iteration
+    resetBook();
+
+    // like Bencher: call the “macro” function with printing turned off
+    process_csv_file("data.csv", false);
+  }
+}
+
+BENCHMARK(BENCHMARK_orderbook);
+BENCHMARK_MAIN();
+
+
+```
+Compiling benchmark executable:
+
+```cpp
+g++ -std=c++20 -O3 -DNDEBUG \
+  -isystem benchmark/include \
+  orderbook.cpp benchmark_orderbook.cpp \
+  -Lbenchmark/build/src -lbenchmark -lpthread \
+  -o benchmark_orderbook
+
+./benchmark_orderbook
+
+```
+File Strucure and example result: https://felix772.github.io/assets/MatchEngine_GoogleBenchmark.pdf
+
+
+---
 ## Casting
 The inputs for my most recent version of match engine are expected to be in the format "A,ts,order_id,side,price,qty,trader" or "C,ts,order_id". And since these data will be stored into Order containers right away and will not be modified. They are iterated using lazy views for a faster and more readable code:
 
