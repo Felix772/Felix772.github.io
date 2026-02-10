@@ -382,7 +382,7 @@ g++ -std=c++20 -O3 -DNDEBUG \
 ./benchmark_orderbook
 
 ```
-File Strucure and example result: https://felix772.github.io/assets/MatchEngine_GoogleBenchmark.pdf
+File Strucure and example result: https://felix772.github.io/assets/MatchEngine_GoogleBenchmark.png
 
 
 ---
