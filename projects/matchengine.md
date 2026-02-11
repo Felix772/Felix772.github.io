@@ -345,8 +345,7 @@ Google Benchmark (https://bencher.dev/learn/benchmarking/cpp/google-benchmark/) 
 - parsing overhead (getline, views::split, conversions)
 - hot-path comparisons (price-time priority logic)
 
-Benchmark design goals
-
+**Benchmark design goals**
 - Avoid I/O in benchmark loops (I/O dominates runtime and ruins measurements)
 - Pre-generate input orders in memory
 
@@ -384,6 +383,82 @@ g++ -std=c++20 -O3 -DNDEBUG \
 ```
 File Strucure and example result: https://felix772.github.io/assets/MatchEngine_GoogleBenchmark.png
 
+### 2) Profiling with Linux perf
+
+While microbenchmarks are great for controlled timing, they don’t tell you why something is slow. For real performance investigation, I used Linux perf to answer questions like:
+- Where are the CPU cycles actually going?
+- Are we stalling on memory?
+- Are branch mispredictions dominating?
+- Are we accidentally allocating in the hot path?
+
+**Build configuration for perf**
+
+To get accurate call stacks, the binary is compiled with:
+- debug symbols (-g)
+- frame pointers enabled (-fno-omit-frame-pointer)
+- no compiler optimizations (-O0) for the most readable stacks
+
+This is done using the following make.sh:
+```cpp
+
+g++ -O0 -std=c++23 -g -fno-omit-frame-pointer -o app main.cpp orderbook.cpp
+
+```
+I've also enabled the option of not printing the output for a more accurate performance measurement, using the following main.cpp:
+```cpp
+
+#include "orderbook.h"
+#include <iostream>
+// main
+int main(int argc, char *argv[]) {
+  try {
+    bool prin = argc > 1 ? std::string(argv[1]) == "true" : false;
+
+    process_csv_file("data.csv", prin);
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << "\n";
+    return 1;
+  }
+  return 0;
+}
+
+```
+
+**perf record: finding hotspots**
+
+To collect a profile:
+```bash
+
+perf record -g -- ./build/match_engine input.txt
+
+```
+Then inspect:
+```bash
+perf report
+```
+
+This shows:
+- the hottest functions
+- inclusive/exclusive CPU time
+- call graphs (-g)
+
+This is how I validated whether optimizations were improving the actual runtime path.
+
+**Measuring CPU counters**
+
+To measure CPU-level performance characteristics, simply run:
+
+```
+perf stat ./app 
+```
+
+This is useful for validating whether optimizations improve:
+- cache locality
+- branch predictability
+- instruction efficiency (IPC)
+
+File Strucure and perf stat result: https://felix772.github.io/assets/MatchEngine_perfstat.png
+perf report: https://felix772.github.io/assets/MatchEngine_perfreport.png
 
 ---
 ## Casting
