@@ -458,7 +458,8 @@ This is useful for validating whether optimizations improve:
 - instruction efficiency (IPC)
 
 File Strucure and perf stat result: https://felix772.github.io/assets/MatchEngine_perfstat.png
-perf report: https://felix772.github.io/assets/MatchEngine_perfreport.png
+
+Perf report: https://felix772.github.io/assets/MatchEngine_perfreport.png
 
 ---
 ## Casting
