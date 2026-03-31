@@ -4,9 +4,8 @@ permalink: /projects/
 title: Projects
 ---
 
-## Projects
+## **MatchEngine** — minimal single-symbol matching engine focused on determinism and performance 
 
-- **MatchEngine** — minimal single-symbol matching engine focused on determinism and performance  
   - [Overview](/projects/matchengine/)
   - [Issues & Optimizations](/projects/matchengine/#issues-optimizations)
   - [Testing](/projects/matchengine/#testing)
