@@ -12,6 +12,8 @@ title: Information Diffusion Model
 - Estimates abnormal returns, distributed-lag response curves, T50, T90, exponential lambda, and half-life
 - Adds acquired-data filtering, event clustering, multi-resolution checks, and deterministic placebo diagnostics
 - Tested on AMD, NVIDIA, TSLA, COIN, and CRWD acquired-data runs using timestamped transcripts and high-frequency or minute-bar market rows
+- Maintained as a Git-tracked Python package with source, tests, scripts, and docs separated from local data and generated outputs
+- [GitHub](https://github.com/Felix772/Information_Diffusion_Model)
 - [Related Agent](https://github.com/Felix772/earnings-call-intelligence-agent)
 
 > Research support only: this project is not investment advice and does not generate buy, sell, or hold recommendations.
@@ -19,6 +21,7 @@ title: Information Diffusion Model
 ## Table of contents
 - [Problem](#problem)
 - [Research Pipeline](#research-pipeline)
+- [Repository Status](#repository-status)
 - [Information Shock](#information-shock)
 - [Acquired Data Runs](#acquired-data-runs)
 - [2026 Expansion Batch](#2026-expansion-batch)
@@ -66,6 +69,24 @@ Core design choices:
 - novelty is calculated only against earlier information, avoiding future transcript leakage
 - market response is benchmark-adjusted with pre-call beta estimation where data is available
 - synthetic mode is separate from acquired-data mode, so real runs do not silently fall back to fake data
+
+---
+
+## Repository Status
+
+The current repository is organized as a reusable Python research package rather than a one-off notebook.
+
+| Area | Current state |
+|---|---|
+| Repository | [Felix772/Information_Diffusion_Model](https://github.com/Felix772/Information_Diffusion_Model) |
+| Package | `earnings-diffusion`, Python 3.12+ |
+| Tracked source | `README.md`, `pyproject.toml`, `scripts/`, `src/`, `tests/`, `.gitignore`, `.gitattributes` |
+| Ignored local artifacts | `data/`, `outputs/`, Python bytecode, test scratch folders, Matplotlib cache, local environment files |
+| Verification | 30 local tests passing with a project-local pytest temp directory |
+
+The repository README now documents both local-file workflows and provider-backed workflows. External sources such as Q4 captions, MarketBeat / Quartr transcripts, Yahoo chart bars, Alpha Vantage transcripts, and Databento market data are treated as optional inputs with explicit provenance notes.
+
+Generated reports and acquired datasets are kept out of version control by default. This avoids accidentally publishing large local files, provider caches, or licensed transcript / market data while keeping the code path reproducible.
 
 ---
 
@@ -222,9 +243,13 @@ earnings-diffusion/
     run_demo.py
     run_real_call.py
     run_acquired_dataset.py
+    run_alpha_vantage_databento.py
+    run_pdf_databento.py
     acquire_q4_caption_transcript.py
+    acquire_marketbeat_yahoo_batch.py
   tests/
-  outputs/
+  data/            ignored local/acquired data
+  outputs/         ignored generated reports and charts
 ```
 
 The acquired-data path is intentionally separate from the synthetic demo. If a required real transcript or market file is missing, the loader raises an error instead of fabricating data.
@@ -246,7 +271,7 @@ The current test suite covers both synthetic and acquired-data behavior:
 Latest local verification:
 
 ```text
-30 passed, 3 expected warnings
+30 passed, 4 expected warnings
 ```
 
 ---
@@ -262,5 +287,6 @@ Current caveats:
 - R^2 is in-sample and should be replaced or supplemented with out-of-sample validation before quantitative model development
 - placebo percentiles are useful diagnostics, but they are not a full causal identification strategy
 - different transcript sources can affect timing granularity, since AMD used ASR segments while NVIDIA used official caption segments
+- the current event-window regression concatenates per-event return windows, so a future clock-time lag design should handle dense or overlapping events more cleanly
 
-The next serious research step is to repeat the acquired-data run across more companies and quarters, then evaluate whether the signal remains stable out of sample.
+The next serious research steps are to add a stricter provenance validator, redesign the distributed-lag matrix around clock time for dense event windows, and repeat the acquired-data run across more companies and quarters to test out-of-sample stability.

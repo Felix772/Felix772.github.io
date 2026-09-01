@@ -26,13 +26,15 @@ title: Projects
 
 ---
 
-## **Information Diffusion Model** - timestamped earnings-call shocks aligned to high-frequency market response across semiconductor, EV, crypto, and cybersecurity calls
+## **Information Diffusion Model** - Python research toolkit for measuring how timestamped earnings-call information diffuses into market prices
 
   - [Overview](/projects/information-diffusion-model/)
   - [Research Pipeline](/projects/information-diffusion-model/#research-pipeline)
+  - [Repository Status](/projects/information-diffusion-model/#repository-status)
   - [Acquired Data Runs](/projects/information-diffusion-model/#acquired-data-runs)
   - [Diagnostics](/projects/information-diffusion-model/#diagnostics)
   - [Testing](/projects/information-diffusion-model/#testing)
+  - [GitHub](https://github.com/Felix772/Information_Diffusion_Model)
   - [Related Agent](https://github.com/Felix772/earnings-call-intelligence-agent)
 
 ---
