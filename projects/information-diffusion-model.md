@@ -11,7 +11,7 @@ title: Information Diffusion Model
 - Aligns those shocks with high-frequency stock, market benchmark, and sector benchmark quote data
 - Estimates abnormal returns, distributed-lag response curves, T50, T90, exponential lambda, and half-life
 - Adds acquired-data filtering, event clustering, multi-resolution checks, and deterministic placebo diagnostics
-- Tested on AMD Q2 2026 and NVIDIA Q2 FY2027 using acquired transcript and market rows
+- Tested on AMD, NVIDIA, TSLA, COIN, and CRWD acquired-data runs using timestamped transcripts and high-frequency or minute-bar market rows
 - [Related Agent](https://github.com/Felix772/earnings-call-intelligence-agent)
 
 > Research support only: this project is not investment advice and does not generate buy, sell, or hold recommendations.
@@ -21,6 +21,7 @@ title: Information Diffusion Model
 - [Research Pipeline](#research-pipeline)
 - [Information Shock](#information-shock)
 - [Acquired Data Runs](#acquired-data-runs)
+- [2026 Expansion Batch](#2026-expansion-batch)
 - [Diagnostics](#diagnostics)
 - [Project Structure](#project-structure)
 - [Testing](#testing)
@@ -89,19 +90,25 @@ For acquired-data experiments, the pipeline can filter low-signal events and clu
 
 ## Acquired Data Runs
 
-The project currently has two acquired-data examples.
+The project currently has five modeled acquired-data examples, plus additional transcript-only acquisitions waiting on suitable high-frequency market data.
 
 | Call | Transcript source | Market source | Segments | Extracted events | Retained events | Modeled events |
 |---|---|---|---:|---:|---:|---:|
 | AMD Q2 2026 | ASR from acquired webcast audio | Databento cache | 845 | 229 | 57 | 44 |
 | NVIDIA Q2 FY2027 | Official Q4 post-event captions | Databento cache | 726 | 189 | 31 | 24 |
+| TSLA Q2 2026 | MarketBeat / Quartr speaker-turn timestamps | Yahoo extended-hours 2-minute bars | 109 | 83 | 11 | 11 |
+| COIN Q2 2026 | MarketBeat / Quartr speaker-turn timestamps | Yahoo extended-hours 2-minute bars | 72 | 40 | 2 | 2 |
+| CRWD Q2 FY2027 | MarketBeat / Quartr speaker-turn timestamps | Yahoo extended-hours 1-minute bars | 103 | 209 | 51 | 35 |
 
-Main 1-second results after filtering and clustering:
+Main results after filtering and clustering:
 
-| Call | T50 | T90 | Lambda | Half-life | Total impact | R^2 |
-|---|---:|---:|---:|---:|---:|---:|
-| AMD Q2 2026 | 61s | 94s | 0.0101 | 68.92s | 0.001181 | 0.0160 |
-| NVIDIA Q2 FY2027 | 50s | 58s | 0.0179 | 38.65s | 0.001348 | 0.0417 |
+| Call | Resolution | T50 | T90 | Lambda | Half-life | Total impact | R^2 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| AMD Q2 2026 | 1s | 61s | 94s | 0.0101 | 68.92s | 0.118% | 0.0160 |
+| NVIDIA Q2 FY2027 | 1s | 50s | 58s | 0.0179 | 38.65s | 0.135% | 0.0417 |
+| TSLA Q2 2026 | 2m | 480s | 480s | 0.2000 | 3.47s | -0.466% | 0.1207 |
+| COIN Q2 2026 | 2m | 240s | 240s | 0.2000 | 3.47s | -0.070% | 0.0133 |
+| CRWD Q2 FY2027 | 1m | 300s | 600s | 0.0027 | 253.19s | -0.470% | 0.0315 |
 
 Baseline comparison:
 
@@ -117,6 +124,49 @@ NVIDIA event alignment:
 NVIDIA cumulative absorption:
 
 ![NVIDIA cumulative absorption](/assets/information-diffusion-nvda-cumulative-absorption.png)
+
+---
+
+## 2026 Expansion Batch
+
+I extended the acquired-data workflow to six additional public-company calls: TSLA, COIN, SNOW, CRWD, MU, and AVGO. All six were converted into timestamped transcript segment files. TSLA, COIN, and CRWD had enough publicly available sub-hour extended-hours market data to run the model.
+
+[Download the expansion summary CSV](/assets/information-diffusion-2026-expansion-summary.csv)
+
+| Ticker | Call | Status | Market data | T50 | T90 | Total impact | R^2 | Placebo R^2 percentile |
+|---|---|---|---|---:|---:|---:|---:|---:|
+| TSLA | Q2 2026 | Modeled | Yahoo 2-minute extended-hours bars | 480s | 480s | -0.466% | 0.1207 | 95% |
+| COIN | Q2 2026 | Modeled, low event count | Yahoo 2-minute extended-hours bars | 240s | 240s | -0.070% | 0.0133 | 10% |
+| CRWD | Q2 FY2027 | Modeled | Yahoo 1-minute extended-hours bars | 300s | 600s | -0.470% | 0.0315 | 60% |
+| SNOW | Q1 FY2027 | Transcript only | No sub-hour public Yahoo history available for the call date | n/a | n/a | n/a | n/a | n/a |
+| MU | Q3 2026 | Transcript only | No sub-hour public Yahoo history available for the call date | n/a | n/a | n/a | n/a | n/a |
+| AVGO | Q2 2026 | Transcript only | No sub-hour public Yahoo history available for the call date | n/a | n/a | n/a | n/a | n/a |
+
+TSLA price and event alignment:
+
+![TSLA price and event alignment](/assets/information-diffusion-tsla-price-events.png)
+
+TSLA cumulative absorption:
+
+![TSLA cumulative absorption](/assets/information-diffusion-tsla-cumulative-absorption.png)
+
+COIN price and event alignment:
+
+![COIN price and event alignment](/assets/information-diffusion-coin-price-events.png)
+
+COIN cumulative absorption:
+
+![COIN cumulative absorption](/assets/information-diffusion-coin-cumulative-absorption.png)
+
+CRWD price and event alignment:
+
+![CRWD price and event alignment](/assets/information-diffusion-crwd-price-events.png)
+
+CRWD cumulative absorption:
+
+![CRWD cumulative absorption](/assets/information-diffusion-crwd-cumulative-absorption.png)
+
+This batch is useful as a coverage expansion, but it is not directly comparable to the Databento-based AMD and NVIDIA runs. The newer runs use MarketBeat / Quartr speaker-turn timestamps rather than official VTT cue timing, and Yahoo close bars rather than true BBO quotes. COIN is especially low-signal after filtering because only two modeled events remained.
 
 ---
 

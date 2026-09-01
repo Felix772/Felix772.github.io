@@ -18,7 +18,7 @@ Low-Latency Systems • Distributed Systems • Backend Engineering • Quantita
 ## Highlights
 - Built a **single-threaded low-latency order matching engine in C++**, implementing a limit order book and price-time priority matching  
 - Currently extending the engine toward **multi-threading, lock-free data structures, and performance optimization**
-- Built an **information diffusion research model** that maps timestamped earnings-call events to high-frequency market response using AMD and NVIDIA acquired-data runs
+- Built an **information diffusion research model** that maps timestamped earnings-call events to high-frequency market response across AMD, NVIDIA, TSLA, COIN, and CRWD acquired-data runs
 - Strong foundations in **Data Structures, Operating Systems, and Networking**
 - Completed an 8-week **low-latency systems curriculum** (Qishi C++ Study Group), covering:
   - concurrency models, memory pools, and lock-free queues  

@@ -26,7 +26,7 @@ title: Projects
 
 ---
 
-## **Information Diffusion Model** - timestamped earnings-call shocks aligned to high-frequency market response
+## **Information Diffusion Model** - timestamped earnings-call shocks aligned to high-frequency market response across semiconductor, EV, crypto, and cybersecurity calls
 
   - [Overview](/projects/information-diffusion-model/)
   - [Research Pipeline](/projects/information-diffusion-model/#research-pipeline)
