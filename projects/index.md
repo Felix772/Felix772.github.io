@@ -26,6 +26,17 @@ title: Projects
 
 ---
 
+## **Information Diffusion Model** - timestamped earnings-call shocks aligned to high-frequency market response
+
+  - [Overview](/projects/information-diffusion-model/)
+  - [Research Pipeline](/projects/information-diffusion-model/#research-pipeline)
+  - [Acquired Data Runs](/projects/information-diffusion-model/#acquired-data-runs)
+  - [Diagnostics](/projects/information-diffusion-model/#diagnostics)
+  - [Testing](/projects/information-diffusion-model/#testing)
+  - [Related Agent](https://github.com/Felix772/earnings-call-intelligence-agent)
+
+---
+
 ## **AI History Show** - bilingual interactive exhibition app for AI milestones, dual-screen display, and content management
 
   - [Overview](/projects/ai-history-show/)
