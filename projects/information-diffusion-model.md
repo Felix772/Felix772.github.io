@@ -82,7 +82,7 @@ The current repository is organized as a reusable Python research package rather
 | Package | `earnings-diffusion`, Python 3.12+ |
 | Tracked source | `README.md`, `pyproject.toml`, `scripts/`, `src/`, `tests/`, `.gitignore`, `.gitattributes` |
 | Ignored local artifacts | `data/`, `outputs/`, Python bytecode, test scratch folders, Matplotlib cache, local environment files |
-| Verification | 30 local tests passing with a project-local pytest temp directory |
+| Verification | 31 local tests passing with a project-local pytest temp directory |
 
 The repository README now documents both local-file workflows and provider-backed workflows. External sources such as Q4 captions, MarketBeat / Quartr transcripts, Yahoo chart bars, Alpha Vantage transcripts, and Databento market data are treated as optional inputs with explicit provenance notes.
 
@@ -127,8 +127,8 @@ Main results after filtering and clustering:
 |---|---:|---:|---:|---:|---:|---:|---:|
 | AMD Q2 2026 | 1s | 61s | 94s | 0.0101 | 68.92s | 0.118% | 0.0160 |
 | NVIDIA Q2 FY2027 | 1s | 50s | 58s | 0.0179 | 38.65s | 0.135% | 0.0417 |
-| TSLA Q2 2026 | 2m | 480s | 480s | 0.2000 | 3.47s | -0.466% | 0.1207 |
-| COIN Q2 2026 | 2m | 240s | 240s | 0.2000 | 3.47s | -0.070% | 0.0133 |
+| TSLA Q2 2026 | 2m | 480s | 480s | 0.0027 | 253.71s | -0.466% | 0.1207 |
+| COIN Q2 2026 | 2m | 240s | 240s | 0.0054 | 129.23s | -0.070% | 0.0133 |
 | CRWD Q2 FY2027 | 1m | 300s | 600s | 0.0027 | 253.19s | -0.470% | 0.0315 |
 
 Baseline comparison:
@@ -152,16 +152,18 @@ NVIDIA cumulative absorption:
 
 I extended the acquired-data workflow to six additional public-company calls: TSLA, COIN, SNOW, CRWD, MU, and AVGO. All six were converted into timestamped transcript segment files. TSLA, COIN, and CRWD had enough publicly available sub-hour extended-hours market data to run the model.
 
+September 2026 audit update: the TSLA and COIN exponential fit values were corrected after an optimizer sensitivity check. Earlier drafts showed `lambda=0.2000` and a `3.47s` half-life for both rows; the corrected values are TSLA `lambda=0.0027`, `253.71s` half-life and COIN `lambda=0.0054`, `129.23s` half-life. These rows remain exploratory because they use speaker-turn transcript timing and Yahoo close bars rather than official caption cues and true bid/ask quotes.
+
 [Download the expansion summary CSV](/assets/information-diffusion-2026-expansion-summary.csv)
 
-| Ticker | Call | Status | Market data | T50 | T90 | Total impact | R^2 | Placebo R^2 percentile |
-|---|---|---|---|---:|---:|---:|---:|---:|
-| TSLA | Q2 2026 | Modeled | Yahoo 2-minute extended-hours bars | 480s | 480s | -0.466% | 0.1207 | 95% |
-| COIN | Q2 2026 | Modeled, low event count | Yahoo 2-minute extended-hours bars | 240s | 240s | -0.070% | 0.0133 | 10% |
-| CRWD | Q2 FY2027 | Modeled | Yahoo 1-minute extended-hours bars | 300s | 600s | -0.470% | 0.0315 | 60% |
-| SNOW | Q1 FY2027 | Transcript only | No sub-hour public Yahoo history available for the call date | n/a | n/a | n/a | n/a | n/a |
-| MU | Q3 2026 | Transcript only | No sub-hour public Yahoo history available for the call date | n/a | n/a | n/a | n/a | n/a |
-| AVGO | Q2 2026 | Transcript only | No sub-hour public Yahoo history available for the call date | n/a | n/a | n/a | n/a | n/a |
+| Ticker | Call | Status | Market data | T50 | T90 | Lambda | Half-life | Total impact | R^2 | Placebo R^2 percentile |
+|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|
+| TSLA | Q2 2026 | Modeled, exploratory | Yahoo 2-minute extended-hours close bars | 480s | 480s | 0.0027 | 253.71s | -0.466% | 0.1207 | 95% |
+| COIN | Q2 2026 | Low event count, exploratory | Yahoo 2-minute extended-hours close bars | 240s | 240s | 0.0054 | 129.23s | -0.070% | 0.0133 | 10% |
+| CRWD | Q2 FY2027 | Modeled, exploratory | Yahoo 1-minute extended-hours close bars | 300s | 600s | 0.0027 | 253.19s | -0.470% | 0.0315 | 60% |
+| SNOW | Q1 FY2027 | Transcript only | No sub-hour public Yahoo history available for the call date | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| MU | Q3 2026 | Transcript only | No sub-hour public Yahoo history available for the call date | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| AVGO | Q2 2026 | Transcript only | No sub-hour public Yahoo history available for the call date | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
 
 TSLA price and event alignment:
 
@@ -271,7 +273,7 @@ The current test suite covers both synthetic and acquired-data behavior:
 Latest local verification:
 
 ```text
-30 passed, 4 expected warnings
+31 passed, 4 expected warnings
 ```
 
 ---
