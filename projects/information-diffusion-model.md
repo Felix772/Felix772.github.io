@@ -11,7 +11,7 @@ title: Information Diffusion Model
 - Aligns those shocks with high-frequency stock, market benchmark, and sector benchmark quote data
 - Estimates abnormal returns, distributed-lag response curves, T50, T90, exponential lambda, and half-life
 - Adds acquired-data filtering, event clustering, multi-resolution checks, and deterministic placebo diagnostics
-- Tested on AMD, NVIDIA, TSLA, COIN, and CRWD acquired-data runs using timestamped transcripts and high-frequency or minute-bar market rows
+- Expanded to eight stocks, 207 cataloged calls, and 137 newly modeled quarters with explicit timing and price-coverage audits
 - Maintained as a Git-tracked Python package with source, tests, scripts, and docs separated from local data and generated outputs
 - [GitHub](https://github.com/Felix772/Information_Diffusion_Model)
 - [Related Agent](https://github.com/Felix772/earnings-call-intelligence-agent)
@@ -34,7 +34,7 @@ title: Information Diffusion Model
 
 ## Problem
 
-Earnings calls release information over time, not all at once. A prepared remark, a margin comment, a guidance detail, or a Q&A answer can become observable at a precise second during the call.
+Earnings calls release information over time, not all at once. Prepared remarks, margin comments, guidance details, and Q&A answers arrive throughout the call. The precision with which they can be located depends on the transcript source.
 
 This project asks a narrow research question:
 
@@ -82,7 +82,7 @@ The current repository is organized as a reusable Python research package rather
 | Package | `earnings-diffusion`, Python 3.12+ |
 | Tracked source | `README.md`, `pyproject.toml`, `scripts/`, `src/`, `tests/`, `.gitignore`, `.gitattributes` |
 | Ignored local artifacts | `data/`, `outputs/`, Python bytecode, test scratch folders, Matplotlib cache, local environment files |
-| Verification | 31 local tests passing with a project-local pytest temp directory |
+| Verification | 36 local tests passing; timestamp-offset, export, and model-rank checks passed |
 
 The repository README now documents both local-file workflows and provider-backed workflows. External sources such as Q4 captions, MarketBeat / Quartr transcripts, Yahoo chart bars, Alpha Vantage transcripts, and Databento market data are treated as optional inputs with explicit provenance notes.
 
@@ -111,7 +111,7 @@ For acquired-data experiments, the pipeline can filter low-signal events and clu
 
 ## Acquired Data Runs
 
-The project currently has five modeled acquired-data examples, plus additional transcript-only acquisitions waiting on suitable high-frequency market data.
+The initial five acquired-data examples below are preserved as earlier experiments. The expanded study now catalogs 207 calls; the September 2026 expansion and its separately audited results follow in the next section.
 
 | Call | Transcript source | Market source | Segments | Extracted events | Retained events | Modeled events |
 |---|---|---|---:|---:|---:|---:|
@@ -150,46 +150,58 @@ NVIDIA cumulative absorption:
 
 ## 2026 Expansion Batch
 
-I extended the acquired-data workflow to six additional public-company calls: TSLA, COIN, SNOW, CRWD, MU, and AVGO. All six were converted into timestamped transcript segment files. TSLA, COIN, and CRWD had enough publicly available sub-hour extended-hours market data to run the model.
+Updated September 6, 2026. I expanded the study across **AMD, AVGO, COIN, CRWD, MU, NVDA, SNOW, and TSLA**, adding **196 transcripts and 21,880 timestamped speaker-turn segments**. The local catalog now contains **207 unique calls**.
 
-September 2026 audit update: the TSLA and COIN exponential fit values were corrected after an optimizer sensitivity check. Earlier drafts showed `lambda=0.2000` and a `3.47s` half-life for both rows; the corrected values are TSLA `lambda=0.0027`, `253.71s` half-life and COIN `lambda=0.0054`, `129.23s` half-life. These rows remain exploratory because they use speaker-turn transcript timing and Yahoo close bars rather than official caption cues and true bid/ask quotes.
+The expansion completed **138 model runs**, including **137 quarters not previously modeled** and one repeat of an existing quarter. The new quarters contain **3,913 modeled information events**; all 138 runs contain 3,966 events. The counts below refer to the 137 newly modeled quarters.
 
-[Download the expansion summary CSV](/assets/information-diffusion-2026-expansion-summary.csv)
+| Stock | Added transcripts | Added segments | New modeled quarters |
+|---|---:|---:|---:|
+| AMD | 27 | 3,152 | 20 |
+| AVGO | 26 | 2,276 | 10 |
+| COIN | 21 | 1,913 | 13 |
+| CRWD | 26 | 2,805 | 13 |
+| MU | 25 | 2,576 | 24 |
+| NVDA | 22 | 1,996 | 20 |
+| SNOW | 23 | 2,983 | 17 |
+| TSLA | 26 | 4,179 | 20 |
 
-| Ticker | Call | Status | Market data | T50 | T90 | Lambda | Half-life | Total impact | R^2 | Placebo R^2 percentile |
-|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|
-| TSLA | Q2 2026 | Modeled, exploratory | Yahoo 2-minute extended-hours close bars | 480s | 480s | 0.0027 | 253.71s | -0.466% | 0.1207 | 95% |
-| COIN | Q2 2026 | Low event count, exploratory | Yahoo 2-minute extended-hours close bars | 240s | 240s | 0.0054 | 129.23s | -0.070% | 0.0133 | 10% |
-| CRWD | Q2 FY2027 | Modeled, exploratory | Yahoo 1-minute extended-hours close bars | 300s | 600s | 0.0027 | 253.19s | -0.470% | 0.0315 | 60% |
-| SNOW | Q1 FY2027 | Transcript only | No sub-hour public Yahoo history available for the call date | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| MU | Q3 2026 | Transcript only | No sub-hour public Yahoo history available for the call date | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| AVGO | Q2 2026 | Transcript only | No sub-hour public Yahoo history available for the call date | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+### Results and downloads
 
-TSLA price and event alignment:
+The table shows the latest successfully modeled call for each stock, selected by call date. Quarter labels follow each company's fiscal calendar. T50 and T90 are raw first threshold crossings; half-life comes from a separate exponential fit, so it need not match T50.
 
-![TSLA price and event alignment](/assets/information-diffusion-tsla-price-events.png)
+| Call | Modeled events | T50 (s) | T90 (s) | Fitted half-life (s) | R² |
+|---|---:|---:|---:|---:|---:|
+| AMD Q4 2025 | 39 | 120 | 120 | 1,039.0 | 0.012 |
+| AVGO Q3 2026 | 31 | 360 | 480 | 309.3 | 0.028 |
+| COIN Q4 2025 | 9 | 660 | 660 | 1,679.2 | 0.047 |
+| CRWD Q4 2026 | 45 | 420 | 660 | 428.1 | 0.015 |
+| MU Q2 2026 | 49 | 420 | 420 | 363.6 | 0.010 |
+| NVDA Q4 2026 | 24 | 120 | 120 | 304.5 | 0.056 |
+| SNOW Q2 2027 | 23 | 480 | 660 | 406.9 | 0.039 |
+| TSLA Q4 2025 | 11 | 120 | 360 | 399.6 | 0.049 |
 
-TSLA cumulative absorption:
+**Every one of the 137 new cumulative responses reverses direction; 123 also overshoot the normalized response range.** These values therefore do not establish stable absorption times or a ranking of which stock processes information fastest. Sixteen fitted half-lives fall below the price-data resolution and are unresolved. Calls with fewer than ten modeled events carry an additional low-sample caution.
 
-![TSLA cumulative absorption](/assets/information-diffusion-tsla-cumulative-absorption.png)
+- [Download all 137 newly modeled quarters](/assets/information-diffusion-new-model-results-20260906.csv): timing, event counts, raw T50/T90, lambda, half-life, R², placebo diagnostics, source links, and measurement flags.
+- [Download the 207-call coverage catalog](/assets/information-diffusion-call-catalog-20260906.csv): completed runs, preserved earlier models, and excluded calls with reasons.
 
-COIN price and event alignment:
+### Timestamp audit
 
-![COIN price and event alignment](/assets/information-diffusion-coin-price-events.png)
+I checked **69 scheduled call starts against company announcements and corrected 68**. All 65 initially flagged anchors were resolved, and a wider check identified four additional errors. Corrections include wrong calendar dates, time-zone offsets, and unusual but valid morning or quarter-hour starts. Original source values and superseded models remain archived locally; only models matching the current call anchor enter the combined results.
 
-COIN cumulative absorption:
+Speaker-turn offsets come from MarketBeat / Quartr. Segment ends use the next turn's start, with a bounded word-count estimate for final or same-offset turns. Absolute timestamps add these offsets to the scheduled start, with daylight-saving time handled explicitly. Actual webcast delays and word-level timing are not independently measured. Other call anchors remain labeled source-reported rather than independently verified.
 
-![COIN cumulative absorption](/assets/information-diffusion-coin-cumulative-absorption.png)
+### Market data and model controls
 
-CRWD price and event alignment:
+I acquired **75 monthly minute-price subsets spanning January 2020 through March 2026** from public [ggaddam](https://huggingface.co/datasets/ggaddam/OHLCV-1m) and [mito0o852](https://huggingface.co/datasets/mito0o852/OHLCV-1m) archives attributed to Finnhub. Recent calls use Yahoo extended-hours bars. The historical archives are community redistributions with unverified exchange provenance. Bar closes stand in for bid, ask, and last; they do not provide actual quote spreads.
 
-![CRWD price and event alignment](/assets/information-diffusion-crwd-price-events.png)
+Bar timestamps move to interval ends to avoid treating a closing price as observable early. Historical coverage requires at least 70% of expected call minutes, no gap above five minutes, at least 20 pre-estimation observations, and prices continuing ten minutes beyond the transcript. Sparse QQQ coverage triggers a SPY check. Conflicting duplicate prices or insufficient coverage exclude a call. Missing bars remain missing in storage; the existing return pipeline forward-fills them during alignment.
 
-CRWD cumulative absorption:
+The new runs use a 600-second maximum lag, 15-second event clustering, and a post-event window extended by one price interval to observe the final lag. Beta estimation excludes the hour before the call. Batch fits include deterministic timestamp-shift placebos, with iteration counts retained in the download. All 138 completed model designs passed the rank check.
 
-![CRWD cumulative absorption](/assets/information-diffusion-crwd-cumulative-absorption.png)
+An independent FirstRate comparison of the Tesla July 19, 2023 call window found 301 matching TSLA minutes and 276 matching QQQ minutes, with median absolute close differences of 0.215 and 0.000 basis points respectively. This single-window check does not validate the whole archive.
 
-This batch is useful as a coverage expansion, but it is not directly comparable to the Databento-based AMD and NVIDIA runs. The newer runs use MarketBeat / Quartr speaker-turn timestamps rather than official VTT cue timing, and Yahoo close bars rather than true BBO quotes. COIN is especially low-signal after filtering because only two modeled events remained.
+The catalog records **57 calls excluded by coverage or model checks, eight transcript-only calls without a matching monthly price file, and four preserved earlier models** outside the expansion results. These minute-bar experiments use different data and settings from the initial one-second AMD and NVIDIA examples above.
 
 ---
 
@@ -208,7 +220,7 @@ NVIDIA was run at 1-second, 5-second, 10-second, and 30-second resolution from t
 | 10s | 10s | 50s | 0.0309 | 0.0629 | 0.0016 |
 | 30s | 90s | 120s | 0.0165 | 0.0253 | 0.0023 |
 
-The NVIDIA R^2 improved meaningfully versus the unfiltered baseline, but T50, T90, and lambda varied across resolutions. That is a useful caution flag: the signal looks real enough to investigate, but not yet stable enough to treat as a production trading model.
+The NVIDIA R^2 improved meaningfully versus the unfiltered baseline, but T50, T90, and lambda varied across resolutions. This variation limits the interpretation of any single speed estimate; the experiment remains exploratory.
 
 ### Placebo tests
 
@@ -225,7 +237,7 @@ For NVIDIA Q2 FY2027:
 | Placebo R^2 p95 | 0.0415 |
 | Real R^2 | 0.0417 |
 
-The real NVIDIA timing ranked near the top of the 20 placebo runs, which is encouraging. The run count is still small, so the percentile should be treated as a diagnostic clue rather than statistical proof.
+In this earlier example, the real NVIDIA timing ranked near the top of the 20 placebo runs. The run count is still small, so the percentile should be treated as a diagnostic clue rather than statistical proof.
 
 ---
 
@@ -269,11 +281,13 @@ The current test suite covers both synthetic and acquired-data behavior:
 - acquired results JSON fields
 - real-call timestamp and market-data handling
 - core diffusion metrics and summary outputs
+- primary-source anchor overrides and disputed-anchor exclusion
+- interval-end bar timing and minimum market coverage
 
 Latest local verification:
 
 ```text
-31 passed, 4 expected warnings
+36 passed, 3 expected fixture warnings
 ```
 
 ---
@@ -291,4 +305,4 @@ Current caveats:
 - different transcript sources can affect timing granularity, since AMD used ASR segments while NVIDIA used official caption segments
 - the current event-window regression concatenates per-event return windows, so a future clock-time lag design should handle dense or overlapping events more cleanly
 
-The next serious research steps are to add a stricter provenance validator, redesign the distributed-lag matrix around clock time for dense event windows, and repeat the acquired-data run across more companies and quarters to test out-of-sample stability.
+Next steps are to verify the remaining source-reported anchors, redesign the distributed-lag matrix around clock time for overlapping events, add release-text novelty controls, and evaluate stability on held-out quarters. The expanded sample provides more observations, but overlapping return windows, in-sample R², and HC1 errors do not establish causality.

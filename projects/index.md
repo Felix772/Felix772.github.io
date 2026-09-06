@@ -32,6 +32,7 @@ title: Projects
   - [Research Pipeline](/projects/information-diffusion-model/#research-pipeline)
   - [Repository Status](/projects/information-diffusion-model/#repository-status)
   - [Acquired Data Runs](/projects/information-diffusion-model/#acquired-data-runs)
+  - [137 New Models & Timing Audit](/projects/information-diffusion-model/#2026-expansion-batch)
   - [Diagnostics](/projects/information-diffusion-model/#diagnostics)
   - [Testing](/projects/information-diffusion-model/#testing)
   - [GitHub](https://github.com/Felix772/Information_Diffusion_Model)
