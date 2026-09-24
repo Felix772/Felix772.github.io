@@ -1,24 +1,109 @@
 ---
 layout: page
 permalink: /projects/matchengine/
-title: MatchEngine
+title: MatchEngine & ITCH 5.0 Parser
 ---
 
-## MatchEngine
+## MatchEngine & ITCH 5.0 Parser
 
-- Built a minimal matching engine for a single stock using **integer-based pricing**
-- Focused on **performance, determinism, and correctness**
-- Emphasized exchange-style constraints such as **price-time priority**
-- [GitHub](https://github.com/Felix772/Match-Engine.git)
+A C++20 price-time-priority order matcher with a multithreaded CSV pipeline,
+bounded pooled storage, and an allocation-free NASDAQ ITCH 5.0 order-depth parser.
+
+**Updated September 24, 2026.** This version is available on the separate
+[`codex/resume-matching-pipeline` branch](https://github.com/Felix772/Match-Engine/tree/codex/resume-matching-pipeline).
+
+[Source code](https://github.com/Felix772/Match-Engine/tree/codex/resume-matching-pipeline) · [Performance evidence](https://github.com/Felix772/Match-Engine/blob/codex/resume-matching-pipeline/PERFORMANCE.md) · [Passing Linux CI](https://github.com/Felix772/Match-Engine/actions/runs/35885284654)
 
 ## Table of contents
-- [Issues & Optimizations](#issues-optimizations)
-  - [Floating-point precision](#floating-point-precision-in-price-comparison)
-  - [getline Windows vs Linux](#stdgetline-behavior-difference-between-windows-and-linux)
-  - [Move semantics](#enabling-move-semantics-lvalues-vs-rvalues)
-- [Testing](#testing) 
-- [Casting](#casting)
-- [Padding Alignment](#padding-alignment)
+
+- [Pipeline and memory](#pipeline-and-memory)
+- [ITCH depth replay](#itch-depth-replay)
+- [Measured performance](#measured-performance)
+- [Validation](#validation)
+- [Earlier implementation notes](#earlier-implementation-notes)
+  - [Issues & Optimizations](#issues-optimizations)
+  - [Testing](#testing)
+  - [Casting](#casting)
+  - [Padding Alignment](#padding-alignment)
+
+## Pipeline and memory
+
+CSV ingestion feeds a bounded SPSC order queue, one matching worker owns the book,
+and a second bounded SPSC queue feeds execution reporting. Each queue holds 4,096
+messages and applies backpressure when full. Worker failures propagate to the
+caller after shutdown. The matching worker preserves arrival-order FIFO, integer
+prices, partial fills, and execution at the resting order's price.
+
+The worker's thread-local book uses PMR price-level maps, FIFO lists, and an ID index
+with stable cancellation iterators. A pre-touched 64 MiB arena supplies reusable
+pool blocks with no heap fallback; exhausting the arena stops replay with an error.
+Trader names use bounded inline storage. Queue counters and MPMC cells are aligned
+to 64-byte cache lines.
+
+The repository also includes a bounded MPMC queue, tested with four producers and
+four consumers. Its atomics are lock-free, but its reservation algorithm does not
+guarantee lock-free progress if a thread stalls. The ordered single-book pipeline
+uses SPSC queues.
+
+## ITCH depth replay
+
+The parser supports **A, F, E, C, X, D, and U** order-depth messages. It validates
+payload lengths, decodes big-endian values, and exposes stock/MPID fields as
+borrowed views without dynamic allocation. On supported GCC/Clang x86 builds,
+runtime AVX2 dispatch accelerates quantity and price decoding for add messages;
+a scalar fallback remains available.
+
+ITCH reports exchange activity. Feed adds populate the selected instrument's book
+without creating synthetic matches; execution/cancel messages reduce quantities,
+deletes remove orders, and replacements change IDs and lose priority. The CLI
+reads two-byte length-prefixed files and filters a daily stock-locate code.
+This is order-depth replay, not a complete ITCH feed handler: other message types,
+live networking, transport protocols, and gap recovery are outside its current scope.
+
+## Measured performance
+
+One local Windows run on September 23, 2026, using GCC 16.2.0 and `-O3 -DNDEBUG`:
+
+| Workload | Throughput | Sampled p99 book-operation latency |
+|---|---:|---:|
+| Add/match, one price | 15.84 million ops/sec | 0.6 microseconds |
+| Add/cancel, one price | 16.56 million ops/sec | 0.6 microseconds |
+| Add/cancel, 1,024 prices | 8.65 million ops/sec | 1.4 microseconds |
+| ITCH add decoding | 36.81 million messages/sec | Not measured |
+| CSV pipeline, including startup, null reporting sink | 1.88 million events/sec | Not measured |
+
+Each synthetic book workload processed one million pre-generated events after
+warmup, with one in 256 operations timed. Book timings exclude ingestion, startup,
+reporting, and network latency. The warmed book and parser loops observed **zero
+C++ heap allocations** on the measured thread. These are workload-specific results
+from one run, not universal latency bounds or before/after speedups.
+
+The [full measurement notes](https://github.com/Felix772/Match-Engine/blob/codex/resume-matching-pipeline/PERFORMANCE.md) document timer overhead, environment limits,
+and a local Windows TLS/ASLR toolchain workaround. Cache-miss reduction, L1 hit
+rate, and Linux hot-path page-fault claims remain unverified; no such percentages
+are inferred from throughput or allocation counts.
+
+## Validation
+
+- Both sequential and threaded modes reproduced **all 127,024 reference trades**
+  from the supplied **200,000 events**.
+- Five deterministic randomized workloads added another 100,000 input events.
+- C++ tests cover FIFO and partial fills, strict CSV parsing, ITCH fields and
+  truncation, depth updates, queue contention, pipeline draining, and worker errors.
+- AVX2 and forced-scalar builds passed locally. Linux CI passed the release build,
+  Google Benchmark targets, AddressSanitizer/UndefinedBehaviorSanitizer, and
+  ThreadSanitizer checks.
+
+The [README](https://github.com/Felix772/Match-Engine/tree/codex/resume-matching-pipeline#readme) contains build commands, input contracts, and replay
+examples; [CI results](https://github.com/Felix772/Match-Engine/actions/runs/35885284654) provide the recorded checks.
+
+## Earlier implementation notes
+
+The notes below document the original single-threaded CSV implementation and
+related C++ learning exercises from January 2026. Their code examples and
+profiling discussion describe that earlier version. For the current architecture,
+parser, and measured results, use the sections above and the linked implementation
+branch.
 
 ---
 

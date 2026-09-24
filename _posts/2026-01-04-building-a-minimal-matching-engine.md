@@ -13,6 +13,8 @@ tags:
   - benchmarking
 ---
 
+> **September 24, 2026 update:** This article documents the original single-threaded CSV engine. The project now includes a multithreaded C++20 pipeline, pooled memory, and an ITCH 5.0 depth parser. See the [current project overview and measured results](/projects/matchengine/) for the new version.
+
 Designing a matching engine is one of those problems that looks trivial at first glance but quickly exposes the tradeoffs between correctness, performance, and clarity. In this post, I walk through my implementation of a **price–time priority order book** in modern C++, explain my thought process and data-structure choices, and then dive into how I **measured and optimized performance** using **Google Benchmark** and **Linux `perf`**.
 
 This implementation processes a CSV stream of orders, supports **add** and **cancel** operations, and performs **continuous matching** between bids and asks.

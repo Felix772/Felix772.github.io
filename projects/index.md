@@ -4,14 +4,15 @@ permalink: /projects/
 title: Projects
 ---
 
-## **MatchEngine** - minimal single-symbol matching engine focused on determinism and performance
+## **MatchEngine & ITCH 5.0 Parser** - multithreaded C++20 order matching and market-depth replay
 
   - [Overview](/projects/matchengine/)
-  - [Issues & Optimizations](/projects/matchengine/#issues-optimizations)
-  - [Testing](/projects/matchengine/#testing)
-  - [Casting](/projects/matchengine/#casting)
-  - [Padding Alignment](/projects/matchengine/#padding-alignment)
-  - [GitHub](https://github.com/Felix772/Match-Engine.git)
+  - [Pipeline & Memory](/projects/matchengine/#pipeline-and-memory)
+  - [ITCH Depth Replay](/projects/matchengine/#itch-depth-replay)
+  - [Measured Performance](/projects/matchengine/#measured-performance)
+  - [Validation](/projects/matchengine/#validation)
+  - [Earlier Implementation Notes](/projects/matchengine/#earlier-implementation-notes)
+  - [Implementation Branch](https://github.com/Felix772/Match-Engine/tree/codex/resume-matching-pipeline)
 
 ---
 
