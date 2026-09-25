@@ -57,7 +57,7 @@ Nov 2025 - Present | C++20
 - Built a three-stage pipeline connecting CSV ingestion, price-time priority matching, and execution reporting through bounded SPSC queues; added a separate bounded MPMC queue implementation and concurrency tests.
 - Used thread-local memory pools, a bounded arena, inline order metadata, and move semantics; observed zero C++ heap allocations in warmed matching and ITCH parsing benchmark loops.
 - Implemented an allocation-free ITCH 5.0 order-depth decoder for A/F/E/C/X/D/U messages, with borrowed string views, runtime AVX2 dispatch, and a portable scalar path.
-- Measured 8.6-16.6 million operations/sec and sampled synchronous book-operation p99 latency of 0.6-1.4 microseconds across three synthetic workloads in one local optimized run; these figures exclude pipeline/network latency.
+- In five local WSL2 runs, measured 6.82-17.58 million operations/sec and sampled synchronous book-operation p99 latency of 0.456-1.403 microseconds across three synthetic workloads; all 15 warmed book loops showed zero minor page faults. These results exclude pipeline/network latency.
 - Verified 127,024 trades from 200,000 supplied events against an independent matcher, plus randomized workloads; passed Linux CI with AddressSanitizer, UndefinedBehaviorSanitizer, and ThreadSanitizer.
 - [Project notes](/projects/matchengine/) | [Benchmark methodology](https://github.com/Felix772/Match-Engine/blob/codex/resume-matching-pipeline/PERFORMANCE.md)
 

@@ -9,10 +9,10 @@ title: MatchEngine & ITCH 5.0 Parser
 A C++20 price-time-priority order matcher with a multithreaded CSV pipeline,
 bounded pooled storage, and an allocation-free NASDAQ ITCH 5.0 order-depth parser.
 
-**Updated September 24, 2026.** This version is available on the separate
+**Updated September 25, 2026.** This version is available on the separate
 [`codex/resume-matching-pipeline` branch](https://github.com/Felix772/Match-Engine/tree/codex/resume-matching-pipeline).
 
-[Source code](https://github.com/Felix772/Match-Engine/tree/codex/resume-matching-pipeline) · [Performance evidence](https://github.com/Felix772/Match-Engine/blob/codex/resume-matching-pipeline/PERFORMANCE.md) · [Passing Linux CI](https://github.com/Felix772/Match-Engine/actions/runs/35885284654)
+[Source code](https://github.com/Felix772/Match-Engine/tree/codex/resume-matching-pipeline) · [Performance evidence](https://github.com/Felix772/Match-Engine/blob/codex/resume-matching-pipeline/PERFORMANCE.md) · [Passing Linux CI](https://github.com/Felix772/Match-Engine/actions/runs/36151055926)
 
 ## Table of contents
 
@@ -62,26 +62,35 @@ live networking, transport protocols, and gap recovery are outside its current s
 
 ## Measured performance
 
-One local Windows run on September 23, 2026, using GCC 16.2.0 and `-O3 -DNDEBUG`:
+On September 25, 2026, I repeated the benchmark five times on this machine's
+Ubuntu WSL2 (Intel Core Ultra 9 185H, GCC 13.3.0, C++20, `-O3 -DNDEBUG`).
+Each book workload replayed one million pre-generated events for warmup and
+measured another million. The timing sample buffer and timer were primed before
+the measured loop.
 
-| Workload | Throughput | Sampled p99 book-operation latency |
-|---|---:|---:|
-| Add/match, one price | 15.84 million ops/sec | 0.6 microseconds |
-| Add/cancel, one price | 16.56 million ops/sec | 0.6 microseconds |
-| Add/cancel, 1,024 prices | 8.65 million ops/sec | 1.4 microseconds |
-| ITCH add decoding | 36.81 million messages/sec | Not measured |
-| CSV pipeline, including startup, null reporting sink | 1.88 million events/sec | Not measured |
+| Workload | Throughput across five runs | Sampled p99 book-operation latency | Hot-loop minor faults |
+|---|---:|---:|---:|
+| Add/match, one price | 14.41-16.28 million ops/sec | 0.495-0.715 microseconds | 0 in every run |
+| Add/cancel, one price | 14.39-17.58 million ops/sec | 0.456-0.670 microseconds | 0 in every run |
+| Add/cancel, 1,024 prices | 6.82-8.91 million ops/sec | 1.013-1.403 microseconds | 0 in every run |
+| ITCH add decoding | 35.70-41.40 million messages/sec | Not measured | Not measured |
 
-Each synthetic book workload processed one million pre-generated events after
-warmup, with one in 256 operations timed. Book timings exclude ingestion, startup,
-reporting, and network latency. The warmed book and parser loops observed **zero
-C++ heap allocations** on the measured thread. These are workload-specific results
-from one run, not universal latency bounds or before/after speedups.
+Zero minor faults were **observed in all 15 warmed book loops** with Linux
+`getrusage(RUSAGE_THREAD)`; startup and whole-process faults are outside this
+measurement. The same loops and the ITCH parser reported zero C++ heap
+allocations on the benchmark thread. Throughput exceeds 450,000 operations/sec,
+and sampled synchronous book p99 is below 2.2 microseconds on these workloads.
+One in 256 operations was timed; clock overhead is included. These measurements
+do not establish an end-to-end pipeline or network latency bound.
 
-The [full measurement notes](https://github.com/Felix772/Match-Engine/blob/codex/resume-matching-pipeline/PERFORMANCE.md) document timer overhead, environment limits,
-and a local Windows TLS/ASLR toolchain workaround. Cache-miss reduction, L1 hit
-rate, and Linux hot-path page-fault claims remain unverified; no such percentages
-are inferred from throughput or allocation counts.
+The local WSL2 `perf stat` reports `<not supported>` for L1 and LLC hardware
+events. I therefore **cannot verify the resume's 60% cache-miss reduction or
+99.8% L1 data-cache hit rate on this machine**. A reduction percentage also
+needs a defined baseline measured with the same input and hardware. Allocation,
+throughput, and page-fault counts do not determine cache hit rates. No CPU pinning
+or exclusive machine use was applied to these five runs.
+
+[Measurement method and limitations](https://github.com/Felix772/Match-Engine/blob/codex/resume-matching-pipeline/PERFORMANCE.md) · [Raw five-run outputs and counter availability](https://github.com/Felix772/Match-Engine/blob/codex/resume-matching-pipeline/benchmarks/local-wsl2-2026-09-25.txt)
 
 ## Validation
 
@@ -95,7 +104,7 @@ are inferred from throughput or allocation counts.
   ThreadSanitizer checks.
 
 The [README](https://github.com/Felix772/Match-Engine/tree/codex/resume-matching-pipeline#readme) contains build commands, input contracts, and replay
-examples; [CI results](https://github.com/Felix772/Match-Engine/actions/runs/35885284654) provide the recorded checks.
+examples; [CI results](https://github.com/Felix772/Match-Engine/actions/runs/36151055926) provide the recorded checks.
 
 ## Earlier implementation notes
 
