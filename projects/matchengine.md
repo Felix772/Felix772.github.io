@@ -9,7 +9,7 @@ title: MatchEngine & ITCH 5.0 Parser
 A C++20 price-time-priority order matcher with a multithreaded CSV pipeline,
 bounded pooled storage, and an allocation-free NASDAQ ITCH 5.0 order-depth parser.
 
-**Updated September 25, 2026.** This version is available on the separate
+**Updated October 6, 2026.** This version is available on the separate
 [`codex/resume-matching-pipeline` branch](https://github.com/Felix772/Match-Engine/tree/codex/resume-matching-pipeline).
 
 [Source code](https://github.com/Felix772/Match-Engine/tree/codex/resume-matching-pipeline) · [Performance evidence](https://github.com/Felix772/Match-Engine/blob/codex/resume-matching-pipeline/PERFORMANCE.md) · [Passing Linux CI](https://github.com/Felix772/Match-Engine/actions/runs/36151055926)
@@ -44,6 +44,11 @@ The repository also includes a bounded MPMC queue, tested with four producers an
 four consumers. Its atomics are lock-free, but its reservation algorithm does not
 guarantee lock-free progress if a thread stalls. The ordered single-book pipeline
 uses SPSC queues.
+
+The `--pipeline` mode reports a runtime `is_lock_free()` check for its
+`std::atomic<bool>` coordination flags and a `std::atomic<std::size_t>` probe.
+The queue templates also require their `std::size_t` atomics to be always
+lock-free at compile time.
 
 ## ITCH depth replay
 
